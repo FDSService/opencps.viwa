@@ -100,7 +100,7 @@ public class DictItemServiceImpl extends DictItemServiceBaseImpl {
 		        dictCollectionId, parentItemId);
 		for (DictItem dictItem : result) {
 			jsonObject.put(
-			    String.valueOf(dictItem.getDictItemId()),
+			    String.valueOf(dictItem.getItemCode()),
 			    dictItem.getItemName(Locale.getDefault()));
 		}
 		return jsonObject;
