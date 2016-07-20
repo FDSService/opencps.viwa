@@ -139,7 +139,7 @@ public class SyncFromFrontOffice implements MessageListener{
 
 						//add data packages to tich hop duongthuy
 						DateFormat dateFormat = DateFormatFactoryUtil
-								.getSimpleDateFormat("YYYY-MM-DD HH:mm:ss");
+								.getSimpleDateFormat("YYYY-MM-dd HH:mm:ss");
 						
 						Date date = new Date();
 						
@@ -233,9 +233,14 @@ public class SyncFromFrontOffice implements MessageListener{
 						JSONObject contentAttachedFile = JSONFactoryUtil.createJSONObject();
 						//
 						List<DossierFile> listDossierFiles = DossierFileLocalServiceUtil.getDossierFileByDossierId(dossier.getDossierId());
-						
+						int i = 0;
 						for (DossierFile dossierFile : listDossierFiles) {
-							contentAttachedFile.put("AttachedTypeCode", dossierFile.getTemplateFileNo());
+							i++;
+							FileEntry fileEntry = DLAppLocalServiceUtil.getFileEntry(dossierFile.getFileEntryId());
+							
+							DossierPart dossierPart = DossierPartLocalServiceUtil.fetchDossierPart(dossierFile.getDossierPartId());
+							
+							contentAttachedFile.put("AttachedTypeCode", Validator.isNotNull(dossierPart)?dossierFile.getTemplateFileNo():StringPool.BLANK);
 							
 							contentAttachedFile.put("AttachedTypeName", dossierFile.getDossierFileType());
 							
@@ -243,13 +248,12 @@ public class SyncFromFrontOffice implements MessageListener{
 							
 							contentAttachedFile.put("AttachedNote", StringPool.BLANK);
 							
-							contentAttachedFile.put("AttachedSequenceNo", dossierFile.getDossierPartId());
+							contentAttachedFile.put("AttachedSequenceNo", i);
 							
-							contentAttachedFile.put("FullFileName", dossierFile.getDisplayName());
+							contentAttachedFile.put("FullFileName", fileEntry.getTitle());
 							
 							String base64File = StringPool.BLANK;
 							
-							FileEntry fileEntry = DLAppLocalServiceUtil.getFileEntry(dossierFile.getFileEntryId());
 							
 							String url =  PortletProps.get("VIRTUAL_HOST") + ":" + PortletProps.get("VIRTUAL_PORT") +  "/documents/"
 							        + fileEntry.getGroupId()
@@ -273,8 +277,11 @@ public class SyncFromFrontOffice implements MessageListener{
 						DossierFile dossierFileOnline = null;
 						
 						if(Validator.isNotNull(dossierPartOnline)){
-						
-							dossierFileOnline = DossierFileLocalServiceUtil.getDossierFileInUse(dossier.getDossierId(), dossierPartOnline.getDossierpartId());
+							try {
+								dossierFileOnline = DossierFileLocalServiceUtil.getDossierFileInUse(dossier.getDossierId(), dossierPartOnline.getDossierpartId());
+							} catch (Exception e) {
+								// TODO: handle exception
+							}
 						
 						}
 						
@@ -329,7 +336,17 @@ public class SyncFromFrontOffice implements MessageListener{
 						
 						contentLv1.put("SignPlace", resultBildingJson.getString("SignPlace"));
 						
-						contentLv1.put("SignDate", resultBildingJson.getString("SignDate"));
+						String signDate = resultBildingJson.getString("SignDate");
+						String fSignDate = StringPool.BLANK;
+						if(Validator.isNotNull(signDate) || signDate.length() > 4){
+							try {
+								Date fDate = dateFormat.parse(signDate);
+								fSignDate = dateFormat.format(fDate);
+							} catch (Exception e) {
+								// TODO: handle exception
+							}
+						}
+						contentLv1.put("SignDate", fSignDate);
 						//
 						
 						objLv4BodyContent.put("Declaration", contentLv1);

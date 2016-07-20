@@ -266,6 +266,17 @@
 		</footer-portlet-javascript>
 		<css-class-wrapper>26-portlet</css-class-wrapper>
 	</portlet>
+	
+	<portlet>
+		<portlet-name>import-dictitem</portlet-name>
+		<icon>/icon.png</icon>
+		<header-portlet-css>/css/main.css</header-portlet-css>
+		<footer-portlet-javascript>
+			/js/main.js
+		</footer-portlet-javascript>
+		<css-class-wrapper>import-dictitem-portlet</css-class-wrapper>
+	</portlet>
+	
 	<role-mapper>
 		<role-name>administrator</role-name>
 		<role-link>Administrator</role-link>
@@ -282,5 +293,5 @@
 		<role-name>user</role-name>
 		<role-link>User</role-link>
 	</role-mapper>
-	
+
 </liferay-portlet-app>

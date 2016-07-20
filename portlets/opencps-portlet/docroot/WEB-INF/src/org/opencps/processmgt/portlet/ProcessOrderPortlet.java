@@ -1083,10 +1083,10 @@ public class ProcessOrderPortlet extends MVCPortlet {
 			.getLong(actionRequest, "dossierFileId");
 
 		try {
-
+			_log.info("******************************"+dossierFileId);
 			DossierFile dossierFile = DossierFileLocalServiceUtil
 				.getDossierFile(dossierFileId);
-
+			_log.info("****************************** dossierFile: "+dossierFile);
 			data = computerHash(actionRequest, dossierFile);
 
 		}
@@ -1244,7 +1244,7 @@ public class ProcessOrderPortlet extends MVCPortlet {
 
 		AccountBean accountBean = AccountUtil
 			.getAccountBean(actionRequest);
-
+		_log.info("**********************accountBean"+accountBean);
 		String tempFolderPath = PortletUtil
 			.getTempFolderPath(actionRequest);
 
@@ -1257,7 +1257,7 @@ public class ProcessOrderPortlet extends MVCPortlet {
 		String employeeEmail = ((Employee) accountBean
 			.getAccountInstance())
 				.getEmail();
-
+		_log.info("**********************employeeEmail"+employeeEmail);
 		boolean isVisible = false;
 
 		String inputFilePath = StringPool.BLANK;
@@ -1279,23 +1279,34 @@ public class ProcessOrderPortlet extends MVCPortlet {
 						.currentTimeMillis() +
 					".pdf";
 
-			String certPath = certFolderPath + "/" + employeeEmail + ".cer";
+			String certPath = certFolderPath  + employeeEmail + ".cer";
 
-			String imagePath = imageFolderPath + "/" + employeeEmail + ".png";
-
+			String imagePath = imageFolderPath + employeeEmail + ".png";
+			_log.info("**********************certPath"+certPath);
+			_log.info("**********************imagePath"+imagePath);
+			_log.info("**********************outputFilePath"+outputFilePath);
+			_log.info("**********************hashFileTempPath"+hashFileTempPath);
 			inputFilePath = PDFUtil
 				.saveAsPdf(tempFolderPath, dossierFile
 					.getFileEntryId());
-
+			_log.info("**********************inputFilePath"+inputFilePath);
 			PdfSigner pdfSigner = SignatureUtil
 				.getPdfSigner(inputFilePath, certPath, hashFileTempPath,
 					outputFilePath, isVisible, imagePath);
-
-			byte[] hash = pdfSigner
-				.computeHash(0, 0, 144, 80);
+			byte[] hash = null;
+			try {
+				_log.info("**111111111111111111111111111111111111");
+				hash = pdfSigner.computeHash(0, 0, 144, 80);
+				_log.info("**22222222222222222222222222222222222222222h");
+			} catch (Exception e) {
+				// TODO: handle exception
+				_log.info("****error***errorerrorerrorerrorerrorerrorerrorerror**************hash");
+				_log.error(e);
+			}
+			_log.info("**********************hash"+hash);
 			String hashHex = Helper
 				.binToHex(hash);
-
+			_log.info("**********************hashHex"+hashHex);
 			data
 				.put("hashHex", hashHex);
 
