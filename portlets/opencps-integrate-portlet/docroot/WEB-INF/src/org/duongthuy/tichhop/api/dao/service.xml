@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE service-builder PUBLIC "-//Liferay//DTD Service Builder 6.2.0//EN" "http://www.liferay.com/dtd/liferay-service-builder_6_2_0.dtd">
+<service-builder package-path="org.duongthuy.tichhop.api.dao">
+	<author>binhth</author>
+	<namespace>duongthuy</namespace>
+
+	<entity name="MessageFunctionData" local-service="true" remote-service="false" table="duongthuy_message_packages">
+
+		<!-- PK fields -->
+
+		<column name="messagePackagesId" type="long" primary="true" />
+
+		<column name="userId" type="long" />
+		<column name="userName" type="String" />
+		<column name="createDate" type="Date" />
+		<column name="modifiedDate" type="Date" />
+
+		<!-- Other fields -->
+
+		<column name="messageFunction" type="String" />
+		
+		<column name="messageId" type="String" />
+		
+		<column name="messageFileIdData" type="String" />
+		
+		<column name="sendDate" type="Date" />
+
+		<column name="version" type="String" />
+
+		<!-- Order -->
+
+		<order by="asc">
+			<order-column name="messageFunction" />
+		</order>
+
+		<!-- Finder methods -->
+
+		<finder name="F_O" return-type="MessageFunctionData">
+			<finder-column name="messageFunction" />
+			<finder-column name="messageId" />
+		</finder>
+        <finder name="MI" return-type="MessageFunctionData">
+            <finder-column name="messageId"></finder-column>
+        </finder>
+	</entity>
+</service-builder>

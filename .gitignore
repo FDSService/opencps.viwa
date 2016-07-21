@@ -227,6 +227,7 @@ portlets/LiferayJSONWebservices-portlet/
 
 portlets/opencps-portlet/*.log
 
+
 portlets/opencps-integrate-portlet/.settings/
 
 portlets/opencps-integrate-portlet/.settings
@@ -253,3 +254,16 @@ hooks/opencps-hook/.settings/
 hooks/opencps-hook/build.xml
 
 *build.xml*
+
+portlets/opencps-integrate-portlet/docroot/WEB-INF/classes
+portlets/opencps-integrate-portlet/docroot/WEB-INF/classes/
+portlets/opencps-integrate-portlet/docroot/css/.sass-cache/
+portlets/opencps-integrate-portlet/docroot/css/.sass-cache
+
+build.binhth.properties
+
+portlets/alpacajs-portlet/
+
+portlets/alpacajs-portlet
+
+.gitignore

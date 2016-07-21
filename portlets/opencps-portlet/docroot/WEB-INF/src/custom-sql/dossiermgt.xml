@@ -587,4 +587,147 @@
 				opencps_dossier.dossierId DESC, opencps_dossier_file.modifiedDate DESC, opencps_dossier_file.displayName ASC
 		]]>
 	</sql>
+	
+	<sql id="org.opencps.dossiermgt.service.persistence.DossierFinder.countDossierForRemoteService">	
+		<![CDATA[
+			SELECT
+				count(*) AS COUNT_VALUE
+			FROM
+				opencps_dossier
+			LEFT JOIN 
+				opencps_processorder
+			ON
+				opencps_dossier.dossierId = opencps_processorder.dossierId
+			WHERE
+				opencps_dossier.govAgencyCode = ?
+			AND
+				opencps_dossier.serviceInfoId = ?
+			AND
+				opencps_processorder.processStepId = ?
+			AND
+				opencps_dossier.dossierStatus = ?
+			AND
+				opencps_dossier.receiveDatetime <= ?
+			AND
+				opencps_dossier.receiveDatetime >= ?
+			AND
+				YEAR(opencps_dossier.receiveDatetime) = ?
+			AND
+				(lower(opencps_dossier.subjectName) LIKE ? [$AND_OR_NULL_CHECK$])
+		]]>
+	</sql>
+	
+	<sql id="org.opencps.dossiermgt.service.persistence.DossierFinder.searchDossierForRemoteService">	
+		<![CDATA[
+			SELECT
+				opencps_dossier.*
+			FROM
+				opencps_dossier
+			LEFT JOIN 
+				opencps_processorder
+			ON
+				opencps_dossier.dossierId = opencps_processorder.dossierId
+			WHERE
+				opencps_dossier.govAgencyCode = ?
+			AND
+				opencps_dossier.serviceInfoId = ?
+			AND
+				opencps_processorder.processStepId = ?
+			AND
+				opencps_dossier.dossierStatus = ?
+			AND
+				opencps_dossier.receiveDatetime <= ?
+			AND
+				opencps_dossier.receiveDatetime >= ?
+			AND
+				YEAR(opencps_dossier.receiveDatetime) = ?
+			AND
+				(lower(opencps_dossier.subjectName) LIKE ? [$AND_OR_NULL_CHECK$])
+		]]>
+	</sql>	
+	
+	<sql id="org.opencps.dossiermgt.service.persistence.DossierFinder.countDossierByUserAssignProcessOrder">	
+		<![CDATA[
+			SELECT
+				count(*) AS COUNT_VALUE
+			FROM
+				opencps_dossier
+			INNER JOIN
+				opencps_processorder
+			ON
+				opencps_dossier.dossierId = opencps_processorder.dossierId
+			WHERE
+				opencps_processorder.assignToUserId = ?	
+		]]>
+	</sql>
+	
+	<sql id="org.opencps.dossiermgt.service.persistence.DossierFinder.searchDossierByUserAssignProcessOrder">	
+		<![CDATA[
+			SELECT
+				opencps_dossier.*
+			FROM
+				opencps_dossier
+			INNER JOIN
+				opencps_processorder
+			ON
+				opencps_dossier.dossierId = opencps_processorder.dossierId
+			WHERE
+				opencps_processorder.assignToUserId = ?
+		]]>
+	</sql>	
+
+	<sql id="org.opencps.dossiermgt.service.persistence.DossierFinder.countDossierByP_S_U">	
+		<![CDATA[
+			SELECT
+				count(*) AS COUNT_VALUE
+			FROM
+				opencps_dossier
+			INNER JOIN
+				opencps_processorder
+			ON
+				opencps_dossier.dossierId = opencps_processorder.dossierId
+			LEFT JOIN
+				opencps_processstep
+			ON
+				opencps_processstep.processStepId = opencps_processorder.processStepId
+			LEFT JOIN
+				opencps_serviceprocess
+			ON	
+				opencps_processorder.serviceProcessId = opencps_serviceprocess.serviceProcessId
+			WHERE
+				opencps_serviceprocess.processNo = ?
+			AND
+				opencps_processstep.sequenceNo = ?
+			AND
+				opencps_processorder.assignToUserId = ?	
+		]]>
+	</sql>
+	
+	<sql id="org.opencps.dossiermgt.service.persistence.DossierFinder.searchDossierByP_S_U">	
+		<![CDATA[
+			SELECT
+				opencps_dossier.*
+			FROM
+				opencps_dossier
+			INNER JOIN
+				opencps_processorder
+			ON
+				opencps_dossier.dossierId = opencps_processorder.dossierId
+			LEFT JOIN
+				opencps_processstep
+			ON
+				opencps_processstep.processStepId = opencps_processorder.processStepId
+			LEFT JOIN
+				opencps_serviceprocess
+			ON	
+				opencps_processorder.serviceProcessId = opencps_serviceprocess.serviceProcessId
+			WHERE
+				opencps_serviceprocess.processNo = ?
+			AND
+				opencps_processstep.sequenceNo = ?
+			AND
+				opencps_processorder.assignToUserId = ?	
+		]]>
+	</sql>	
+	
 </custom-sql>

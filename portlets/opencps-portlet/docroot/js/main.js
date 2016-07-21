@@ -5,7 +5,7 @@ Liferay.provide(window, 'openDialog', function(uri, id, title) {
 				cache: false,
 				cssClass: 'opencps-dialog',
 				modal: true,
-				
+				 width: $(window).width() * 0.8
 			},
 			cache: false,
 			id: id,

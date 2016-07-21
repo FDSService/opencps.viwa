@@ -209,9 +209,11 @@ public class DossierMgtFrontOfficePortlet extends MVCPortlet {
 		String sourceFileName = uploadPortletRequest
 			.getFileName(DossierFileDisplayTerms.DOSSIER_FILE_UPLOAD);
 
-		sourceFileName = sourceFileName
-			.concat(PortletConstants.TEMP_RANDOM_SUFFIX).concat(StringUtil
-				.randomString());
+		/*
+		 * sourceFileName = sourceFileName
+		 * .concat(PortletConstants.TEMP_RANDOM_SUFFIX).concat(StringUtil
+		 * .randomString());
+		 */
 
 		String redirectURL = ParamUtil
 			.getString(uploadPortletRequest, "redirectURL");
@@ -1053,8 +1055,8 @@ public class DossierMgtFrontOfficePortlet extends MVCPortlet {
 		long dossierId = ParamUtil
 			.getLong(actionRequest, DossierDisplayTerms.DOSSIER_ID);
 
-		int dossierStatus = ParamUtil
-			.getInteger(actionRequest, DossierDisplayTerms.DOSSIER_STATUS);
+		String dossierStatus = ParamUtil
+			.getString(actionRequest, DossierDisplayTerms.DOSSIER_STATUS);
 
 		String redirectURL = ParamUtil
 			.getString(actionRequest, "redirectURL");
@@ -1063,7 +1065,8 @@ public class DossierMgtFrontOfficePortlet extends MVCPortlet {
 			.getAccountBean(actionRequest);
 
 		try {
-			if (dossierStatus == PortletConstants.DOSSIER_STATUS_NEW) {
+			if (dossierStatus
+				.equals(PortletConstants.DOSSIER_STATUS_NEW)) {
 				validateDeleteDossier(dossierId, accountBean);
 				DLFolder accountFolder = accountBean
 					.getAccountFolder();
@@ -1824,7 +1827,7 @@ public class DossierMgtFrontOfficePortlet extends MVCPortlet {
 				.getDictItem(districtId);
 			DictItem ward = DictItemLocalServiceUtil
 				.getDictItem(wardId);
-			
+
 			if (city != null) {
 				cityCode = city
 					.getItemCode();
@@ -2215,8 +2218,8 @@ public class DossierMgtFrontOfficePortlet extends MVCPortlet {
 			.getLong(actionRequest,
 				DossierDisplayTerms.GOVAGENCY_ORGANIZATION_ID);
 
-		int dossierStatus = ParamUtil
-			.getInteger(actionRequest, DossierDisplayTerms.DOSSIER_STATUS);
+		String dossierStatus = ParamUtil
+			.getString(actionRequest, DossierDisplayTerms.DOSSIER_STATUS);
 
 		String redirectURL = ParamUtil
 			.getString(actionRequest, "redirectURL");
@@ -2226,7 +2229,7 @@ public class DossierMgtFrontOfficePortlet extends MVCPortlet {
 				.getInstance(actionRequest);
 
 			UserActionMsg actionMsg = new UserActionMsg();
-
+			_log.info("dossierStatusr: " + dossierStatus);
 			Message message = new Message();
 			switch (dossierStatus) {
 			case PortletConstants.DOSSIER_STATUS_WAITING:
@@ -2283,8 +2286,9 @@ public class DossierMgtFrontOfficePortlet extends MVCPortlet {
 
 				break;
 			case PortletConstants.DOSSIER_STATUS_NEW:
-
+				_log.info("start validateSubmitDossier: " + dossierId);
 				validateSubmitDossier(dossierId);
+				_log.info("end validateSubmitDossier: " + dossierId);
 
 				actionMsg
 					.setAction(WebKeys.ACTION_SUBMIT_VALUE);
@@ -2335,9 +2339,10 @@ public class DossierMgtFrontOfficePortlet extends MVCPortlet {
 				break;
 			}
 
+			
+			_log.info("MESSAGE BUS: " + actionMsg.getAction());
 			MessageBusUtil
 				.sendMessage("opencps/frontoffice/out/destination", message);
-
 		}
 		catch (Exception e) {
 

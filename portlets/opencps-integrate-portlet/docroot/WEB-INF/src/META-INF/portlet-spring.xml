@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" default-destroy-method="destroy" default-init-method="afterPropertiesSet" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+	<bean id="org.duongthuy.tichhop.api.dao.service.MessageFunctionDataLocalService" class="org.duongthuy.tichhop.api.dao.service.impl.MessageFunctionDataLocalServiceImpl" />
+	<bean id="org.duongthuy.tichhop.api.dao.service.persistence.MessageFunctionDataPersistence" class="org.duongthuy.tichhop.api.dao.service.persistence.MessageFunctionDataPersistenceImpl" parent="basePersistence" />
+</beans>

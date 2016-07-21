@@ -28,8 +28,10 @@ import java.util.Map;
 import org.opencps.accountmgt.model.Business;
 import org.opencps.accountmgt.model.Citizen;
 import org.opencps.datamgt.service.DictItemLocalServiceUtil;
+import org.opencps.dossiermgt.model.Dossier;
 import org.opencps.dossiermgt.model.DossierFile;
 import org.opencps.dossiermgt.service.DossierFileLocalServiceUtil;
+import org.opencps.dossiermgt.service.DossierLocalServiceUtil;
 
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.json.JSONArray;
@@ -46,6 +48,7 @@ import com.liferay.portal.kernel.util.Validator;
  */
 public class AutoFillFormData {
 	public static String dataBinding(String sampleData,Citizen ownerCitizen, Business ownerBusiness, long dossierId) {
+		System.out.println("AutoFillFormData.dataBinding()"+sampleData);
 		String result = StringPool.BLANK;
 		String _subjectName = StringPool.BLANK;
 	 	String _subjectId = StringPool.BLANK;
@@ -122,7 +125,7 @@ public class AutoFillFormData {
 			JSONObject jsonSampleData = JSONFactoryUtil.createJSONObject(sampleData);
 			Map<String, Object> jsonMap = jsonToMap(jsonSampleData);
 			for (Map.Entry<String, Object> entry : jsonMap.entrySet()) {
-//				System.out.println(entry.getKey() + ": " + entry.getValue());
+				System.out.println("FUCK====" + entry.getKey() + ": " + entry.getValue());
 				String value = String.valueOf(entry.getValue());
 				if(value.startsWith("_")){
 					if(value.equals("_subjectName")){
@@ -149,7 +152,20 @@ public class AutoFillFormData {
 						jsonMap.put(entry.getKey(), _contactTelNo);
 					}else if(value.equals("_contactEmail")){
 						jsonMap.put(entry.getKey(), _contactEmail);
+					}else if(value.equals("_ngayNopDon")){
+						jsonMap.put(entry.getKey(), ngayNopDon());
+					}else if(value.equals("_donViThucHien")){
+						if(dossierId > 0){
+							try {
+								Dossier dossier = DossierLocalServiceUtil.fetchDossier(dossierId);
+								jsonMap.put(entry.getKey(), dossier.getGovAgencyName());
+							} catch (SystemException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
 					}
+					
 				}else if(value.startsWith("#") && value.contains("@")){
 					String newString = value.substring(1);
 					String[] stringSplit = newString.split("@");
@@ -169,7 +185,6 @@ public class AutoFillFormData {
 				}
 			}
 			
-			jsonMap.put("_ngayNopDon", ngayNopDon());
 			jsonSampleData = JSONFactoryUtil.createJSONObject();
 			for (Map.Entry<String, Object> entry : jsonMap.entrySet()) {
 //				System.out.println(entry.getKey() + ": " + entry.getValue());
@@ -238,13 +253,18 @@ public class AutoFillFormData {
         while(keysItr.hasNext()) {
             String key = keysItr.next();
             Object value = null;
-            if(object.getJSONArray(key) instanceof JSONArray) {
+            if(Validator.isNotNull(object.getJSONArray(key))) {
                 value = toList((JSONArray) object.getJSONArray(key));
                 map.put(key, value);
             }
 
-            else if(object.getJSONObject(key) instanceof JSONObject) {
+            else if(Validator.isNotNull(object.getJSONObject(key))) {
                 value = toMap((JSONObject) object.getJSONObject(key));
+                map.put(key, value);
+            }
+            
+            else  {
+                value = object.getString(key);
                 map.put(key, value);
             }
         }

@@ -302,7 +302,7 @@
 		<field name="actionNote" type="String" />
 		<field name="assignToUserId" type="long" />
 		<field name="processWorkflowId" type="long" />
-		<field name="dossierStatus" type="int" />
+		<field name="dossierStatus" type="String" />
 		<field name="errorInfo" type="String" />
 	</model>
 	<model name="org.opencps.processmgt.model.ProcessStep">
@@ -452,7 +452,7 @@
 		<field name="receptionNo" type="String" />
 		<field name="estimateDatetime" type="Date" />
 		<field name="finishDatetime" type="Date" />
-		<field name="dossierStatus" type="int" />
+		<field name="dossierStatus" type="String" />
 		<field name="dossierSource" type="int" />
 		<field name="keypayRedirectUrl" type="String" />
 		<field name="delayStatus" type="int" />
@@ -489,6 +489,7 @@
 		<field name="original" type="int" />
 		<field name="syncStatus" type="int" />
 		<field name="version" type="int" />
+		<field name="signed" type="boolean" />
 	</model>
 	<model name="org.opencps.dossiermgt.model.DossierLog">
 		<field name="dossierLogId" type="long" />
@@ -500,7 +501,7 @@
 		<field name="dossierId" type="long" />
 		<field name="fileGroupId" type="long" />
 		<field name="requestCommand" type="String" />
-		<field name="dossierStatus" type="int" />
+		<field name="dossierStatus" type="String" />
 		<field name="actionInfo" type="String">
 			<hint name="max-length">255</hint>
 		</field>
@@ -556,7 +557,7 @@
 		<field name="modifiedDate" type="Date" />
 		<field name="dossierId" type="long" />
 		<field name="fileGroupId" type="long" />
-		<field name="dossierStatus" type="int" />
+		<field name="dossierStatus" type="String" />
 		<field name="actionInfo" type="String" />
 		<field name="messageInfo" type="String" />
 		<field name="updateDatetime" type="Date" />
@@ -683,5 +684,19 @@
 		<field name="invoiceTemplateNo" type="String" />
 		<field name="invoiceIssueNo" type="String" />
 		<field name="invoiceNo" type="String" />
+		<field name="syncStatus" type="int" />
+	</model>
+	<model name="org.opencps.api.model.ApiService">
+		<field name="apiLogId" type="long" />
+		<field name="companyId" type="long" />
+		<field name="groupId" type="long" />
+		<field name="userId" type="long" />
+		<field name="createDate" type="Date" />
+		<field name="modifiedDate" type="Date" />
+		<field name="apiCode" type="String" />
+		<field name="ipAddress" type="String" />
+		<field name="httpAgent" type="String" />
+		<field name="params" type="String" />
+		<field name="status" type="String" />
 	</model>
 </model-hints>
