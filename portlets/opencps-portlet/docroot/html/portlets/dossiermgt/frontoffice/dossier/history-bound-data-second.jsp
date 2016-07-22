@@ -1,3 +1,7 @@
+<%@page import="org.opencps.util.DateTimeUtil"%>
+<%@page import="org.opencps.util.WebKeys"%>
+<%@page import="org.opencps.dossiermgt.model.DossierLog"%>
+<%@page import="com.liferay.portal.kernel.dao.search.ResultRow"%>
 <%
 /**
  * OpenCPS is the open source Core Public Services software
@@ -16,7 +20,21 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 %>
-<%@ include file="../init.jsp"%>
-<div class="home-search">
-	<liferay-util:include page="/html/portlets/dossiermgt/monitoring/toolbar.jsp" servletContext="<%=application %>" />
+<%@ include file="../../init.jsp"%>
+
+<%
+	ResultRow row = (ResultRow) request.getAttribute(WebKeys.SEARCH_CONTAINER_RESULT_ROW);
+	DossierLog dossierLog = (DossierLog) row.getObject();
+%>
+
+<div class="ocps-searh-bound-data">
+	<p class="ocps-searh-bound-data-chirld-p">
+		<span class="ocps-searh-bound-data-chirld-span">
+			<liferay-ui:message key="reception-time" />
+		</span>
+		<label class="ocps-searh-bound-data-chirld-label">
+			<%=DateTimeUtil.convertDateToString(dossierLog.getUpdateDatetime(), DateTimeUtil._VN_DATE_TIME_FORMAT) %>
+		</label>
+	</p>
 </div>
+
