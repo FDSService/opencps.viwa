@@ -19,6 +19,8 @@ package org.opencps.backend.message;
 
 import java.util.Date;
 
+import org.opencps.paymentmgt.model.PaymentFile;
+
 
 /**
  * @author khoavd
@@ -264,6 +266,62 @@ public class SendToBackOfficeMsg {
 	protected Date estimateDatetime;
 	protected Date finishDatetime;
 	protected long processWorkflowId;
+	
+    /**
+     * @return the paymentFile
+     */
+    public PaymentFile getPaymentFile() {
+    
+    	return paymentFile;
+    }
+
+	
+    /**
+     * @param paymentFile the paymentFile to set
+     */
+    public void setPaymentFile(PaymentFile paymentFile) {
+    
+    	this.paymentFile = paymentFile;
+    }
+	protected PaymentFile paymentFile;
+	
+    /**
+     * @return the companyId
+     */
+    public long getCompanyId() {
+    
+    	return companyId;
+    }
+
+	
+    /**
+     * @param companyId the companyId to set
+     */
+    public void setCompanyId(long companyId) {
+    
+    	this.companyId = companyId;
+    }
+
+	
+    /**
+     * @return the govAgencyCode
+     */
+    public String getGovAgencyCode() {
+    
+    	return govAgencyCode;
+    }
+
+	
+    /**
+     * @param govAgencyCode the govAgencyCode to set
+     */
+    public void setGovAgencyCode(String govAgencyCode) {
+    
+    	this.govAgencyCode = govAgencyCode;
+    }
+	protected long companyId;
+	protected String govAgencyCode;
+	
     /**
      * @return the requestCommand
      */

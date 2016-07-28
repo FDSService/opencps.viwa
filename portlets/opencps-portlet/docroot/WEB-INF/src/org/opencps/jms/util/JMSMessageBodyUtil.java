@@ -18,6 +18,7 @@
 package org.opencps.jms.util;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.opencps.dossiermgt.model.Dossier;
@@ -40,7 +41,9 @@ import org.opencps.util.DLFileEntryUtil;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portlet.documentlibrary.model.DLFileEntry;
+import com.liferay.portlet.documentlibrary.service.DLFileEntryLocalServiceUtil;
 
 /**
  * @author trungnt
@@ -146,7 +149,33 @@ public class JMSMessageBodyUtil {
 				DossierFileLocalServiceUtil.getDossierFileByDossierId(dossier.getDossierId());
 
 			List<DossierFileMsgBody> dossierFileMsgBodies =
-				new ArrayList<DossierFileMsgBody>();
+				getDossierFileMsgBody(dossierFiles);
+
+			dossierMsgBody.setDossier(dossier);
+			dossierMsgBody.setDossierTemplate(dossierTemplate);
+			dossierMsgBody.setLstDossierFileMsgBody(dossierFileMsgBodies);
+			dossierMsgBody.setServiceConfig(serviceConfig);
+			dossierMsgBody.setServiceInfo(serviceInfo);
+		}
+		catch (Exception e) {
+			_log.error(e);
+		}
+
+		return dossierMsgBody;
+	}
+
+	/**
+	 * @param dossierFiles
+	 * @return
+	 */
+	public static List<DossierFileMsgBody> getDossierFileMsgBody(
+		List<DossierFile> dossierFiles) {
+
+		List<DossierFileMsgBody> dossierFileMsgBodies =
+			new ArrayList<DossierFileMsgBody>();
+
+		try {
+
 			if (dossierFiles != null) {
 				for (DossierFile dossierFile : dossierFiles) {
 					DossierFileMsgBody dossierFileMsgBody =
@@ -188,17 +217,145 @@ public class JMSMessageBodyUtil {
 				}
 			}
 
-			dossierMsgBody.setDossier(dossier);
-			dossierMsgBody.setDossierTemplate(dossierTemplate);
-			dossierMsgBody.setLstDossierFileMsgBody(dossierFileMsgBodies);
-			dossierMsgBody.setServiceConfig(serviceConfig);
-			dossierMsgBody.setServiceInfo(serviceInfo);
 		}
 		catch (Exception e) {
-			_log.error(e);
+			// TODO: handle exception
 		}
 
-		return dossierMsgBody;
+		return dossierFileMsgBodies;
+
+	}
+
+	public static class AnalyzeDossierFile {
+
+		public AnalyzeDossierFile(List<DossierFileMsgBody> dossierFileMsgBodies) {
+
+			if (Validator.isNotNull(dossierFileMsgBodies)) {
+				LinkedHashMap<DossierFile, DossierPart> syncDossierFiles =
+					new LinkedHashMap<DossierFile, DossierPart>();
+
+				LinkedHashMap<String, DLFileEntry> syncDLFileEntries =
+					new LinkedHashMap<String, DLFileEntry>();
+
+				LinkedHashMap<String, byte[]> data =
+					new LinkedHashMap<String, byte[]>();
+
+				LinkedHashMap<String, FileGroup> syncFileGroups =
+					new LinkedHashMap<String, FileGroup>();
+
+				LinkedHashMap<Long, DossierPart> syncFileGroupDossierParts =
+					new LinkedHashMap<Long, DossierPart>();
+
+				for (DossierFileMsgBody dossierFileMsgBody : dossierFileMsgBodies) {
+					DossierFile syncDossierFile =
+						dossierFileMsgBody.getDossierFile();
+
+					syncDossierFiles.put(
+						syncDossierFile, dossierFileMsgBody.getDossierPart());
+
+					data.put(
+						syncDossierFile.getOid(), dossierFileMsgBody.getBytes());
+
+					DLFileEntry dlFileEntry =
+						DLFileEntryLocalServiceUtil.createDLFileEntry(syncDossierFile.getFileEntryId());
+
+					dlFileEntry.setDescription(dossierFileMsgBody.getFileDescription());
+
+					dlFileEntry.setTitle(dossierFileMsgBody.getFileTitle());
+
+					dlFileEntry.setMimeType(dossierFileMsgBody.getMimeType());
+
+					dlFileEntry.setExtension(dossierFileMsgBody.getExtension());
+
+					dlFileEntry.setName(dossierFileMsgBody.getFileName());
+
+					syncDLFileEntries.put(syncDossierFile.getOid(), dlFileEntry);
+
+					FileGroup syncFileGroup = dossierFileMsgBody.getFileGroup();
+
+					if (syncFileGroup != null) {
+
+						syncFileGroups.put(
+							syncDossierFile.getOid(), syncFileGroup);
+
+						syncFileGroupDossierParts.put(
+							syncFileGroup.getFileGroupId(),
+							dossierFileMsgBody.getFileGroupDossierPart());
+					}
+
+				}
+
+				this.setData(data);
+				this.setSyncDLFileEntries(syncDLFileEntries);
+				this.setSyncDossierFiles(syncDossierFiles);
+				this.setSyncFileGroupDossierParts(syncFileGroupDossierParts);
+				this.setSyncFileGroups(syncFileGroups);
+			}
+		}
+
+		public LinkedHashMap<DossierFile, DossierPart> getSyncDossierFiles() {
+
+			return _syncDossierFiles;
+		}
+
+		public void setSyncDossierFiles(
+			LinkedHashMap<DossierFile, DossierPart> syncDossierFiles) {
+
+			this._syncDossierFiles = syncDossierFiles;
+		}
+
+		public LinkedHashMap<String, FileGroup> getSyncFileGroups() {
+
+			return _syncFileGroups;
+		}
+
+		public void setSyncFileGroups(
+			LinkedHashMap<String, FileGroup> syncFileGroups) {
+
+			this._syncFileGroups = syncFileGroups;
+		}
+
+		public LinkedHashMap<Long, DossierPart> getSyncFileGroupDossierParts() {
+
+			return _syncFileGroupDossierParts;
+		}
+
+		public void setSyncFileGroupDossierParts(
+			LinkedHashMap<Long, DossierPart> syncFileGroupDossierParts) {
+
+			this._syncFileGroupDossierParts = syncFileGroupDossierParts;
+		}
+
+		public LinkedHashMap<String, DLFileEntry> getSyncDLFileEntries() {
+
+			return _syncDLFileEntries;
+		}
+
+		public void setSyncDLFileEntries(
+			LinkedHashMap<String, DLFileEntry> syncDLFileEntries) {
+
+			this._syncDLFileEntries = syncDLFileEntries;
+		}
+
+		public LinkedHashMap<String, byte[]> getData() {
+
+			return _data;
+		}
+
+		public void setData(LinkedHashMap<String, byte[]> data) {
+
+			this._data = data;
+		}
+
+		protected LinkedHashMap<DossierFile, DossierPart> _syncDossierFiles;
+
+		protected LinkedHashMap<String, FileGroup> _syncFileGroups;
+
+		protected LinkedHashMap<Long, DossierPart> _syncFileGroupDossierParts;
+
+		protected LinkedHashMap<String, DLFileEntry> _syncDLFileEntries;
+
+		protected LinkedHashMap<String, byte[]> _data;
 	}
 
 	private static Log _log =

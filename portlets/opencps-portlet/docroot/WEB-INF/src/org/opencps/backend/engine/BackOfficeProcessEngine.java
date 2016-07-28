@@ -80,6 +80,8 @@ public class BackOfficeProcessEngine implements MessageListener {
 		    (SendToEngineMsg) message.get("msgToEngine");
 
 		SendToBackOfficeMsg toBackOffice = new SendToBackOfficeMsg();
+		
+		_log.info("&&&&&&&&&&&&&&&&&&&" + toEngineMsg.getDossierId());
 
 		Dossier dossier = BackendUtils.getDossier(toEngineMsg.getDossierId());
 
@@ -100,6 +102,7 @@ public class BackOfficeProcessEngine implements MessageListener {
 			
 
 			try {
+				
 				ServiceConfig serviceConfig = ServiceConfigLocalServiceUtil.getServiceConfigByG_S_G(toEngineMsg.getGroupId(), serviceInfoId, govAgencyCode);
 				serviceProcessId = serviceConfig.getServiceProcessId();
 /*				    ServiceInfoProcessLocalServiceUtil.getServiceInfo(
@@ -269,6 +272,8 @@ public class BackOfficeProcessEngine implements MessageListener {
 				}
 
 				toBackOffice.setProcessWorkflowId(processWorkflowId);
+				toBackOffice.setCompanyId(toEngineMsg.getCompanyId());
+				toBackOffice.setGovAgencyCode(govAgencyCode);
 
 				long ownerUserId = 0;
 				long ownerOrganizationId = 0;
@@ -318,12 +323,13 @@ public class BackOfficeProcessEngine implements MessageListener {
 					}
 
 					toBackOffice.setRequestCommand(WebKeys.DOSSIER_LOG_PAYMENT_REQUEST);
-
+					toBackOffice.setPaymentFile(paymentFile);
+					
 				}
 				else {
 					toBackOffice.setRequestPayment(0);
 				}
-
+				
 				Message sendToBackOffice = new Message();
 
 				sendToBackOffice.put("toBackOffice", toBackOffice);
@@ -339,6 +345,8 @@ public class BackOfficeProcessEngine implements MessageListener {
 				toBackOffice.setDossierId(toEngineMsg.getDossierId());
 				toBackOffice.setFileGroupId(toEngineMsg.getFileGroupId());
 				toBackOffice.setDossierStatus(PortletConstants.DOSSIER_STATUS_ERROR);
+				toBackOffice.setCompanyId(toEngineMsg.getCompanyId());
+				toBackOffice.setGovAgencyCode(govAgencyCode);
 
 				Message sendToBackOffice = new Message();
 
