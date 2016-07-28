@@ -17,17 +17,11 @@
 
 package org.opencps.backend.exc;
 
-import javax.jms.BytesMessage;
-import javax.jms.ObjectMessage;
-import javax.jms.StreamMessage;
-import javax.jms.TextMessage;
+import javax.jms.JMSException;
+import javax.naming.NamingException;
 
-import org.opencps.backend.message.UserActionMsg;
-import org.opencps.jms.context.JMSContext;
-import org.opencps.jms.message.SubmitDossierMessage;
-import org.opencps.jms.message.SyncFromBackOfficeMessage;
-import org.opencps.jms.message.body.DossierMsgBody;
-import org.opencps.jms.message.body.SyncFromBackOfficeMsgBody;
+import org.opencps.jms.context.JMSHornetqContext;
+import org.opencps.jms.util.JMSMessageBodyUtil;
 import org.opencps.jms.util.JMSMessageUtil;
 import org.opencps.util.PortletUtil;
 import org.opencps.util.WebKeys;
@@ -60,12 +54,9 @@ public class MsgInFrontOffice implements MessageListener {
 
 	private void _doReceive(Message message) {
 
-		System.out.println("**doRevice msgInFrontOffice");
+		System.out.println("MsgInFrontOffice/////////////////////////////////");
 
 		long[] companyIds = PortalUtil.getCompanyIds();
-
-		_log.info("********************************************************CompanyIds Length*********************************************** " +
-			companyIds.length);
 
 		long companyId = 0;
 
@@ -73,65 +64,41 @@ public class MsgInFrontOffice implements MessageListener {
 			for (int i = 0; i < companyIds.length; i++) {
 				if (PortletUtil.checkJMSConfig(companyIds[i])) {
 					companyId = companyIds[i];
-					_log.info("********************************************************companyId*********************************************** " +
-						companyId);
 					break;
 				}
 			}
 		}
 
 		if (companyId > 0) {
-			_log.info("Start create connection to JMS Queue..................");
-			JMSContext context =
-				JMSMessageUtil.createConsumer(
-					companyId, StringPool.BLANK, true,
-					WebKeys.JMS_QUEUE_OPENCPS_FRONTOFFICE.toLowerCase(), "local");
-			try {
-				int messageInQueue = context.countMessageInQueue();
-				int receiveNumber = messageInQueue <= 50 ? messageInQueue : 50;
+			/*
+			 * JMSContext context = JMSMessageUtil.createConsumer( companyId,
+			 * StringPool.BLANK, true,
+			 * WebKeys.JMS_QUEUE_OPENCPS_FRONTOFFICE.toLowerCase(),
+			 * WebKeys.JMS_QUEUE_OPENCPS_FRONTOFFICE.toLowerCase(), "local",
+			 * "jmscore");
+			 */
 
-				_log.info("********************************************************Queue Size*********************************************** " +
-					messageInQueue);
+			JMSHornetqContext context =
+				JMSMessageUtil.createHornetqConsumer(
+					companyId, StringPool.BLANK, true,
+					WebKeys.JMS_QUEUE_OPENCPS_FRONTOFFICE.toLowerCase(),
+					WebKeys.JMS_QUEUE_OPENCPS_FRONTOFFICE.toLowerCase(),
+					"local", "hornetq");
+			try {
+
+				int receiveNumber = 50;
 
 				int count = 1;
+
 				while (count <= receiveNumber) {
-
+					// _log.info("Start receive message/////////////////////////////////////");
 					javax.jms.Message jsmMessage =
-						context.getMessageConsumer().receive();
+						context.getMessageConsumer().receive(1000);
+					// _log.info("Received message/////////////////////////////////////");
 					if (jsmMessage != null) {
-						if (jsmMessage instanceof TextMessage) {
-							_log.info("*******************TextMessage*******************");
-							_log.info(((TextMessage) jsmMessage).getText());
-						}
-						else if (jsmMessage instanceof ObjectMessage) {
-							_log.info("*******************ObjectMessage*******************");
-							_log.info(((ObjectMessage) jsmMessage).getClass().getName());
-						}
-						else if (jsmMessage instanceof BytesMessage) {
-							BytesMessage bytesMessage =
-								(BytesMessage) jsmMessage;
-							_log.info("*******************BytesMessage*******************");
-							_log.info(((BytesMessage) jsmMessage).getBodyLength());
-							byte[] result =
-								new byte[(int) bytesMessage.getBodyLength()];
-							bytesMessage.readBytes(result);
-							Object object =
-								JMSMessageUtil.convertByteArrayToObject(result);
-							if (object instanceof SyncFromBackOfficeMsgBody) {
-								SyncFromBackOfficeMsgBody syncFromBackOfficeMsgBody =
-									(SyncFromBackOfficeMsgBody) object;
-								SyncFromBackOfficeMessage syncFromBackOfficeMessage =
-									new SyncFromBackOfficeMessage(context);
-								syncFromBackOfficeMessage.receiveLocalMessage(syncFromBackOfficeMsgBody);
-
-							}
-						}
-						else if (jsmMessage instanceof StreamMessage) {
-							_log.info("*******************StreamMessage*******************");
-						}
+						JMSMessageBodyUtil.receiveMessage(context, jsmMessage);
 					}
 					else {
-						_log.info("*******************Null Message*******************");
 					}
 
 					count++;
@@ -143,12 +110,16 @@ public class MsgInFrontOffice implements MessageListener {
 			finally {
 				try {
 					context.destroy();
+					_log.info("Destroy Received message/////////////////////////////////////");
 				}
-				catch (Exception e) {
+				catch (JMSException e) {
 					_log.error(e);
 				}
-
+				catch (NamingException e) {
+					_log.error(e);
+				}
 			}
+
 		}
 		else {
 			_log.info("Cannot create connection to JMS Queue..................");

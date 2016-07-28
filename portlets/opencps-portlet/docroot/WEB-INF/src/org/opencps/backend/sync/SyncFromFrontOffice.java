@@ -65,9 +65,11 @@ public class SyncFromFrontOffice implements MessageListener{
 	 * @param message
 	 */
 	private void _doReceiveDossier(Message message) {
+		
 
 		UserActionMsg userActionMgs =
 		    (UserActionMsg) message.get("msgToEngine");
+
 
 		String action = userActionMgs.getAction();
 
@@ -171,6 +173,7 @@ public class SyncFromFrontOffice implements MessageListener{
 					    userActionMgs.getDossierId(),
 					    userActionMgs.getFileGroupId(),
 					    dossier.getDossierStatus(), dossier.getReceptionNo(),
+					    dossier.getSubmitDatetime(),
 					    dossier.getEstimateDatetime(),
 					    dossier.getReceiveDatetime(),
 					    dossier.getFinishDatetime(),
@@ -187,6 +190,7 @@ public class SyncFromFrontOffice implements MessageListener{
 					    userActionMgs.getDossierId(),
 					    userActionMgs.getFileGroupId(),
 					    dossier.getDossierStatus(), dossier.getReceptionNo(),
+					    dossier.getSubmitDatetime(),
 					    dossier.getEstimateDatetime(),
 					    dossier.getReceiveDatetime(),
 					    dossier.getFinishDatetime(),
@@ -211,7 +215,7 @@ public class SyncFromFrontOffice implements MessageListener{
      */
 	private boolean _checkServiceMode(long dossierId) {
 
-		boolean trustServiceMode = true;
+		boolean trustServiceMode = false;
 
 		try {
 			Dossier dossier = DossierLocalServiceUtil.fetchDossier(dossierId);
@@ -222,7 +226,7 @@ public class SyncFromFrontOffice implements MessageListener{
 			    ServiceConfigLocalServiceUtil.fetchServiceConfig(serviceConfigId);
 			
 			if (serviceConfig.getServicePortal()) {
-				trustServiceMode = false;
+				trustServiceMode = true;
 			} 
 		}
 		catch (Exception e) {

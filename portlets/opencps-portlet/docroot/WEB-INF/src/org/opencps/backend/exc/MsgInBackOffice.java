@@ -17,14 +17,8 @@
 
 package org.opencps.backend.exc;
 
-import javax.jms.BytesMessage;
-import javax.jms.ObjectMessage;
-import javax.jms.StreamMessage;
-import javax.jms.TextMessage;
-
-import org.opencps.jms.context.JMSContext;
-import org.opencps.jms.message.SubmitDossierMessage;
-import org.opencps.jms.message.body.DossierMsgBody;
+import org.opencps.jms.context.JMSHornetqContext;
+import org.opencps.jms.util.JMSMessageBodyUtil;
 import org.opencps.jms.util.JMSMessageUtil;
 import org.opencps.util.PortletUtil;
 import org.opencps.util.WebKeys;
@@ -37,27 +31,23 @@ import com.liferay.portal.kernel.messaging.MessageListenerException;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.util.PortalUtil;
 
-
 /**
  * @author khoavd
- * 
  */
-public class MsgInBackOffice implements MessageListener{
-    @Override
-    public void receive(Message message)
-        throws MessageListenerException {
+public class MsgInBackOffice implements MessageListener {
 
-	    _doReceive(message);
-    }
-    
-    private void _doReceive(Message message) {
-    	System.out.println("**doRevice msgInBackOffice");
-    	
-    	
+	@Override
+	public void receive(Message message)
+		throws MessageListenerException {
+
+		_doReceive(message);
+	}
+
+	private void _doReceive(Message message) {
+
+		System.out.println("doRevice MsgInBackOffice/////////////////////////");
+
 		long[] companyIds = PortalUtil.getCompanyIds();
-
-		_log.info("********************************************************CompanyIds Length*********************************************** " +
-			companyIds.length);
 
 		long companyId = 0;
 
@@ -65,64 +55,34 @@ public class MsgInBackOffice implements MessageListener{
 			for (int i = 0; i < companyIds.length; i++) {
 				if (PortletUtil.checkJMSConfig(companyIds[i])) {
 					companyId = companyIds[i];
-					_log.info("********************************************************companyId*********************************************** " +
-						companyId);
+
 					break;
 				}
 			}
 		}
 
 		if (companyId > 0) {
-			_log.info("Start create connection to JMS Queue..................");
-			JMSContext context =
-				JMSMessageUtil.createConsumer(
-					companyId, StringPool.BLANK, true,
-					WebKeys.JMS_QUEUE_OPENCPS.toLowerCase(), "local");
-			try {
-				int messageInQueue = context.countMessageInQueue();
-				int receiveNumber = messageInQueue <= 50 ? messageInQueue : 50;
+			/*
+			 * JMSContext context = JMSMessageUtil.createConsumer( companyId,
+			 * StringPool.BLANK, true, WebKeys.JMS_QUEUE_OPENCPS.toLowerCase(),
+			 * WebKeys.JMS_QUEUE_OPENCPS.toLowerCase(), "local", "jmscore");
+			 */
 
-				_log.info("********************************************************Queue Size*********************************************** " +
-					messageInQueue);
+			JMSHornetqContext context =
+				JMSMessageUtil.createHornetqConsumer(
+					companyId, StringPool.BLANK, true,
+					WebKeys.JMS_QUEUE_OPENCPS.toLowerCase(),
+					WebKeys.JMS_QUEUE_OPENCPS.toLowerCase(), "local", "hornetq");
+			try {
 
 				int count = 1;
-				while (count <= 1) {
+
+				while (count <= 50) {
 
 					javax.jms.Message jsmMessage =
-						context.getMessageConsumer().receive();
+						context.getMessageConsumer().receive(1000);
 					if (jsmMessage != null) {
-						if (jsmMessage instanceof TextMessage) {
-							_log.info("*******************TextMessage*******************");
-							_log.info(((TextMessage) jsmMessage).getText());
-						}
-						else if (jsmMessage instanceof ObjectMessage) {
-							_log.info("*******************ObjectMessage*******************");
-							_log.info(((ObjectMessage) jsmMessage).getClass().getName());
-						}
-						else if (jsmMessage instanceof BytesMessage) {
-							BytesMessage bytesMessage =
-								(BytesMessage) jsmMessage;
-							_log.info("*******************BytesMessage*******************");
-							_log.info(((BytesMessage) jsmMessage).getBodyLength());
-							byte[] result =
-								new byte[(int) bytesMessage.getBodyLength()];
-							bytesMessage.readBytes(result);
-							Object object =
-								JMSMessageUtil.convertByteArrayToObject(result);
-							if (object instanceof DossierMsgBody) {
-								DossierMsgBody dossierMsgBody =
-									(DossierMsgBody) object;
-								SubmitDossierMessage submitDossierMessage =
-									new SubmitDossierMessage(context);
-								submitDossierMessage.receiveLocalMessage(dossierMsgBody);
-							}
-						}
-						else if (jsmMessage instanceof StreamMessage) {
-							_log.info("*******************StreamMessage*******************");
-						}
-					}
-					else {
-						_log.info("*******************Null Message*******************");
+						JMSMessageBodyUtil.receiveMessage(context, jsmMessage);
 					}
 
 					count++;
@@ -141,11 +101,8 @@ public class MsgInBackOffice implements MessageListener{
 
 			}
 		}
-		else {
-			_log.info("Cannot create connection to JMS Queue..................");
-		}
 
-    }
-    
-    private Log _log = LogFactoryUtil.getLog(MsgInBackOffice.class);
+	}
+
+	private Log _log = LogFactoryUtil.getLog(MsgInBackOffice.class);
 }

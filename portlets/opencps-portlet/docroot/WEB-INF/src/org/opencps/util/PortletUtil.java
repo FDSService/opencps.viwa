@@ -452,6 +452,14 @@ public class PortletUtil {
 	}
 
 	public static String getDossierDestinationFolder(
+		long groupId, int year, int month, int day) {
+
+		return String.valueOf(groupId) + StringPool.SLASH + "Dossiers" +
+			StringPool.SLASH + String.valueOf(year) + StringPool.SLASH +
+			String.valueOf(month) + StringPool.SLASH + String.valueOf(day);
+	}
+
+	public static String getDossierDestinationFolder(
 		long groupId, int year, int month, int day, String oid) {
 
 		return String.valueOf(groupId) + StringPool.SLASH + "Dossiers" +
@@ -773,7 +781,8 @@ public class PortletUtil {
 	}
 
 	public static Properties getJMSContextProperties(
-		long companyId, String code, boolean remote, String channelName, String lookup)
+		long companyId, String code, boolean remote, String channelName,
+		String queueName, String lookup, String mom)
 		throws SystemException {
 
 		Properties properties = new Properties();
@@ -786,7 +795,8 @@ public class PortletUtil {
 			GetterUtil.getString(preferences.getValue(
 				WebKeys.JMS_CONFIGURATION, StringPool.BLANK));
 
-		_log.info("(PortletUtil.getJMSContextProperties) - jmsJson: " + jmsJSON);
+		// _log.info("(PortletUtil.getJMSContextProperties) - jmsJson: " +
+		// jmsJSON);
 
 		try {
 
@@ -794,23 +804,18 @@ public class PortletUtil {
 			JSONObject jmsJSONObject =
 				JSONFactoryUtil.createJSONObject(jmsJSON);
 
-			_log.info("(PortletUtil.getJMSContextProperties) - jmsJSONObject: " +
-				jmsJSONObject.toString());
+			// Get mom configuration
+			JSONObject momObject = jmsJSONObject.getJSONObject(mom);
 
 			// Get lookup configuration
-			JSONObject lookupObject =
-				jmsJSONObject.getJSONObject(lookup);
-
-			_log.info("(PortletUtil.getJMSContextProperties) - lookupObject: " +
-				lookupObject.toString());
+			JSONObject lookupObject = momObject.getJSONObject(lookup);
 
 			JSONObject jsmServerCnfObject = null;
 
 			if (remote && lookup.equals("remote")) {
 				// Get jms remote server by gov agency code
 				jsmServerCnfObject = lookupObject.getJSONObject(code);
-				_log.info("(PortletUtil.getJMSContextProperties) - jsmServerCnfObject: " +
-					jsmServerCnfObject.toString());
+
 			}
 			else {
 				// Local server
@@ -819,66 +824,47 @@ public class PortletUtil {
 
 			// Analyze configuration
 			if (jsmServerCnfObject != null) {
-				JSONObject channelObject =
-					jsmServerCnfObject.getJSONObject(WebKeys.JMS_CHANNEL);
-				_log.info("(PortletUtil.getJMSContextProperties) - channelObject: " +
-					channelObject.toString());
 
 				String providerURL =
 					jsmServerCnfObject.getString(WebKeys.JMS_PROVIDER_URL);
-				_log.info("(PortletUtil.getJMSContextProperties) - providerURL: " +
-					providerURL.toString());
-				if (remote && Validator.isNotNull(providerURL)) {
+
+				if (remote && Validator.isNotNull(providerURL) &&
+					mom.equals("jmscore")) {
 					providerURL = "remote://" + providerURL;
 				}
 
 				String providerPort =
 					jsmServerCnfObject.getString(WebKeys.JMS_PROVIDER_PORT);
 
-				_log.info("(PortletUtil.getJMSContextProperties) - providerPort:* " +
-					providerPort.toString());
-
 				String userName =
 					jsmServerCnfObject.getString(WebKeys.JMS_USERNAME);
-
-				_log.info("(PortletUtil.getJMSContextProperties) - userName: " +
-					userName.toString());
 
 				String passWord =
 					jsmServerCnfObject.getString(WebKeys.JMS_PASSWORD);
 
-				_log.info("(PortletUtil.getJMSContextProperties) - password:" +
-					passWord.toString());
-
 				String syncCompanyId =
 					jsmServerCnfObject.getString(WebKeys.JMS_COMPANY_ID);
 
-				_log.info("(PortletUtil.getJMSContextProperties) - syncCompanyId: " +
-					syncCompanyId);
 				String syncGroupId =
 					jsmServerCnfObject.getString(WebKeys.JMS_GROUP_ID);
-				_log.info("(PortletUtil.getJMSContextProperties) - syncGroupId: " +
-					syncGroupId);
+
 				String syncUserId =
 					jsmServerCnfObject.getString(WebKeys.JMS_USER_ID);
 
-				_log.info("(PortletUtil.getJMSContextProperties) - syncUserId: " +
-					syncUserId);
+				if (Validator.isNotNull(channelName)) {
+					JSONObject channelObject =
+						jsmServerCnfObject.getJSONObject(WebKeys.JMS_CHANNEL);
+					String channel = channelObject.getString(channelName);
+					properties.put(WebKeys.JMS_DESTINATION, channel);
+				}
 
-				_log.info("(PortletUtil.getJMSContextProperties) - channelName: " +
-					channelName.toString());
+				if (Validator.isNotNull(queueName)) {
+					JSONObject queueObject =
+						jsmServerCnfObject.getJSONObject(WebKeys.JMS_QUEUE_NAME);
+					String queue = queueObject.getString(queueName);
+					properties.put(WebKeys.JMS_QUEUE, queue);
 
-				String channel = channelObject.getString(channelName);
-
-				_log.info("(PortletUtil.getJMSContextProperties) - channel: " +
-					channel);
-
-				_log.info("(PortletUtil.getJMSContextProperties) - providerURL: " +
-					providerURL);
-
-				properties.put(
-					Context.INITIAL_CONTEXT_FACTORY,
-					org.jboss.naming.remote.client.InitialContextFactory.class.getName());
+				}
 
 				properties.put(Context.PROVIDER_URL, providerURL +
 					(remote
@@ -886,11 +872,15 @@ public class PortletUtil {
 
 				properties.put(Context.SECURITY_PRINCIPAL, userName);
 				properties.put(Context.SECURITY_CREDENTIALS, passWord);
+				properties.put(
+					Context.INITIAL_CONTEXT_FACTORY,
+					org.jboss.naming.remote.client.InitialContextFactory.class.getName());
 
-				properties.put(WebKeys.JMS_DESTINATION, channel);
 				properties.put(WebKeys.JMS_COMPANY_ID, syncCompanyId);
 				properties.put(WebKeys.JMS_GROUP_ID, syncGroupId);
 				properties.put(WebKeys.JMS_USER_ID, syncUserId);
+				properties.put(WebKeys.JMS_PROVIDER_PORT, providerPort);
+				properties.put(WebKeys.JMS_PROVIDER_URL, providerURL);
 
 			}
 
