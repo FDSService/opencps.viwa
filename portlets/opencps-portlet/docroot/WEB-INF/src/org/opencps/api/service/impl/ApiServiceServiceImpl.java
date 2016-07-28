@@ -409,10 +409,16 @@ public class ApiServiceServiceImpl extends ApiServiceServiceBaseImpl {
 							e.printStackTrace();
 						}
 					} else {
-						jsonDossierFile.put("dossierFileContent", df.getFormData());
+//						jsonDossierFile.put("dossierFileContent", df.getFormData());
 						jsonDossierFile.put("dossierFileURL", "");
+						
 					}
 
+					if (Validator.isNotNull(df.getFormData())) {
+						jsonDossierFile.put("dossierFileContent", df.getFormData());
+						//jsonDossierFile.put("dossierFileURL", "");						
+					}
+					
 					if (df.getDossierFileDate() != null) {
 						jsonDossierFile.put("dossierFileDate",
 								sdf.format(df.getDossierFileDate()));

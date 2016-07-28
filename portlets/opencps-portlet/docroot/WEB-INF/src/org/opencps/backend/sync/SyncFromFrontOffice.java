@@ -226,7 +226,7 @@ public class SyncFromFrontOffice implements MessageListener{
 			    ServiceConfigLocalServiceUtil.fetchServiceConfig(serviceConfigId);
 			
 			if (serviceConfig.getServicePortal()) {
-				trustServiceMode = false;
+				trustServiceMode = true;
 			} 
 		}
 		catch (Exception e) {
