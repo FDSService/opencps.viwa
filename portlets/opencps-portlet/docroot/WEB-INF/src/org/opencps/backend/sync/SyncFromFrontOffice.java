@@ -76,7 +76,7 @@ public class SyncFromFrontOffice implements MessageListener{
 		long dosserId = userActionMgs.getDossierId();
 
 		boolean trustServiceMode = _checkServiceMode(dosserId);
-		trustServiceMode = true;
+		//trustServiceMode = true;
 		
 		if (trustServiceMode) {
 			try {
