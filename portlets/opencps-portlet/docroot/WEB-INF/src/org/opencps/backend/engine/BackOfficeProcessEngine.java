@@ -36,10 +36,12 @@ import org.opencps.paymentmgt.service.PaymentFileLocalServiceUtil;
 import org.opencps.processmgt.model.ProcessOrder;
 import org.opencps.processmgt.model.ProcessStep;
 import org.opencps.processmgt.model.ProcessWorkflow;
+import org.opencps.processmgt.model.ServiceInfoProcess;
 import org.opencps.processmgt.service.ProcessOrderLocalServiceUtil;
 import org.opencps.processmgt.service.ProcessStepLocalServiceUtil;
 import org.opencps.processmgt.service.ProcessWorkflowLocalServiceUtil;
 import org.opencps.processmgt.service.SchedulerJobsLocalServiceUtil;
+import org.opencps.processmgt.service.ServiceInfoProcessLocalServiceUtil;
 import org.opencps.util.PortletConstants;
 import org.opencps.util.WebKeys;
 
@@ -100,9 +102,10 @@ public class BackOfficeProcessEngine implements MessageListener {
 			govAgencyOrganizationId = dossier.getGovAgencyOrganizationId();
 			
 			try {
-				
-				ServiceConfig serviceConfig = ServiceConfigLocalServiceUtil.getServiceConfigByG_S_G(toEngineMsg.getGroupId(), serviceInfoId, govAgencyCode);
-				serviceProcessId = serviceConfig.getServiceProcessId();
+				//ServiceConfig serviceConfig = ServiceConfigLocalServiceUtil.getServiceConfigByG_S_G(toEngineMsg.getGroupId(), serviceInfoId, govAgencyCode);
+				ServiceInfoProcess serviceInfoProcess = ServiceInfoProcessLocalServiceUtil.getServiceInfo(serviceInfoId);
+				//serviceProcessId = serviceConfig.getServiceProcessId();
+				serviceProcessId = serviceInfoProcess.getServiceProcessId();
 			}
 			catch (Exception e) {
 				_log.error(e);
@@ -114,7 +117,7 @@ public class BackOfficeProcessEngine implements MessageListener {
 
 		long processOrderId = toEngineMsg.getProcessOrderId();
 
-
+		_log.info("PROCESS ORDER ID IN BACK OFFICE==========" + processOrderId);
 		try {
 			if (Validator.isNull(processOrderId)) {
 
@@ -124,7 +127,7 @@ public class BackOfficeProcessEngine implements MessageListener {
 				        toEngineMsg.getFileGroupId());
 
 				if (Validator.isNull(processOrder)) {
-
+					_log.info("PROCESS ORDER IS NULL===========");
 					// Init process order
 					processOrder =
 					    ProcessOrderLocalServiceUtil.initProcessOrder(

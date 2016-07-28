@@ -76,7 +76,8 @@ public class SyncFromFrontOffice implements MessageListener{
 		long dosserId = userActionMgs.getDossierId();
 
 		boolean trustServiceMode = _checkServiceMode(dosserId);
-
+		trustServiceMode = true;
+		
 		if (trustServiceMode) {
 			try {
 				if (Validator.equals(WebKeys.ACTION_SUBMIT_VALUE, action) &&

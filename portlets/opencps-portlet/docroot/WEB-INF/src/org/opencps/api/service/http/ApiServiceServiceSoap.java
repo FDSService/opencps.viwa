@@ -170,5 +170,20 @@ public class ApiServiceServiceSoap {
 		}
 	}
 
+	public static java.lang.String getByoid(java.lang.String oid,
+		java.lang.String filetype) throws RemoteException {
+		try {
+			com.liferay.portal.kernel.json.JSONObject returnValue = ApiServiceServiceUtil.getByoid(oid,
+					filetype);
+
+			return returnValue.toString();
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
 	private static Log _log = LogFactoryUtil.getLog(ApiServiceServiceSoap.class);
 }

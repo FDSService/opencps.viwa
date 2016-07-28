@@ -71,6 +71,12 @@ public class ApiServiceServiceClpInvoker {
 				"java.lang.String", "java.lang.String", "java.lang.String",
 				"java.lang.String", "java.lang.String"
 			};
+
+		_methodName39 = "getByoid";
+
+		_methodParameterTypes39 = new String[] {
+				"java.lang.String", "java.lang.String"
+			};
 	}
 
 	public Object invokeMethod(String name, String[] parameterTypes,
@@ -129,6 +135,12 @@ public class ApiServiceServiceClpInvoker {
 				(java.lang.String)arguments[3], (java.lang.String)arguments[4]);
 		}
 
+		if (_methodName39.equals(name) &&
+				Arrays.deepEquals(_methodParameterTypes39, parameterTypes)) {
+			return ApiServiceServiceUtil.getByoid((java.lang.String)arguments[0],
+				(java.lang.String)arguments[1]);
+		}
+
 		throw new UnsupportedOperationException();
 	}
 
@@ -150,4 +162,6 @@ public class ApiServiceServiceClpInvoker {
 	private String[] _methodParameterTypes37;
 	private String _methodName38;
 	private String[] _methodParameterTypes38;
+	private String _methodName39;
+	private String[] _methodParameterTypes39;
 }
