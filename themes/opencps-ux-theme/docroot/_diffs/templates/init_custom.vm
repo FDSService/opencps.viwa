@@ -9,3 +9,4 @@ This file allows you to override and define new Velocity variables.
 #set ($theme_style = $theme.getSetting("theme-style")+".css")
 
 #set ($theme_vm = $theme.getSetting("theme-style")+"_portal_normal.vm")
+

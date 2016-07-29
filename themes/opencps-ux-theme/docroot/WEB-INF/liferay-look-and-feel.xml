@@ -9,7 +9,7 @@
 		<settings>
             <setting type="select" configurable="true" 
                 key="theme-style" 
-                options="opencps,pointgtvt,viwa,vnra"                   
+                options="opencps,pointgtvt,pointgtvtpage,viwa,vnra"                   
                 value="opencps" ></setting>
         </settings>
 	</theme>
